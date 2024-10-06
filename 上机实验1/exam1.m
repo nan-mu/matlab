@@ -1,8 +1,5 @@
-% 绘图实例
-
 clear;
 
-% 原函数
 syms x;
 y = exp((-0.2 + 0.4i) * x);
 n = -10:10;
@@ -61,7 +58,7 @@ title('虚部');
 xlabel('n');
 ylabel('Im(x(n))');
 
-sgtitle('y(n)=e^{(-0.2 + 0.4j)n}','Interpreter', 'latex')
+sgtitle('y(n)=e^{(-0.2 + 0.4j)n}', 'Interpreter', 'latex')
 
 % title("图标标题");
 % legend("图例"); %接受一个数组
