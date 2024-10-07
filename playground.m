@@ -1,47 +1,31 @@
-clear;
+numBits = 1e5;
+SNR_dB = 0:2:20;
+M = 4;
+k = log2(M);
 
-% 计算参数
-sigma = 1; % 信道增益标准差
-n_0 = 0.1; % 白噪声功率谱密度
-data_size = 10 * 1014 * 1024; % 传输次数
+ber = zeros(1, length(SNR_dB));
+modObj = @(bits) pskmod(bits, M, pi / M, 'gray', 'InputType', 'bit');
+demodObj = @(rxSig) pskdemod(rxSig, M, pi / M, 'gray', 'OutputType', 'bit');
 
-% 计算公式
-%% 瑞利信道和模拟输入
-syms bit1 bit2 hi hq n;
-qpsk = 1 / sqrt(2) * ((2 * bit1 - 1) + 1i * (2 * bit2 - 1));
-h = hi + 1i * hq;
+for snr_idx = 1:length(SNR_dB)
+    bits = randi([0 1], numBits, 1);
 
-%% 信道输出
-y = h * qpsk + n;
+    txSig = modObj(bits);
 
-% 模拟信道传输
-error_conut = 0; % 错误次数
+    h = (randn(numBits / k, 1) + 1j * randn(numBits / k, 1)) / sqrt(2);
 
-for index = 1:data_size
-    %% 带入信道增益
-    y_temp = subs(y, hi, sigma * randn);
-    y_temp = subs(y_temp, hq, sigma * randn);
+    rxSig = h .* txSig;
 
-    %% 带入噪声
-    y_temp = subs(y_temp, n, sqrt(n_0 / 2) * (randn + 1i * randn));
+    noisePower = 10 ^ (-SNR_dB(snr_idx) / 10);
+    noise = sqrt(noisePower / 2) * (randn(numBits / k, 1) + 1j * randn(numBits / k, 1));
+    rxSig = rxSig + noise;
 
-    %% 带入输出
-    temp_data = randi([0, 1], 1, 2);
-    y_temp = subs(y_temp, bit1, temp_data(1));
-    y_temp = subs(y_temp, bit2, temp_data(2));
+    rxSig_eq = rxSig ./ h;
 
-    %% 计算信道输出并解调
-    out = double(y_temp);
-    out_bits = [real(out) > 0, imag(out) > 0]; % 解调
+    rxBits = demodObj(rxSig_eq);
 
-    error_conut = error_conut + (out_bits(1) ~= temp_data(1)) + (out_bits(2) ~= temp_data(2));
-
+    [numErrs, ber(snr_idx)] = biterr(bits, rxBits);
 end
 
-% 计算理论误码率
-E_b = sigma ^ 2;
-BER = 1/2 * (1 - sqrt(E_b / (E_b + n_0)));
-
-disp(['理论误码率: ', num2str(BER)]);
-
-disp(['仿真误码率：', num2str(error_conut / data_size / 2)]); % 输出错误率
+% 绘制 BER 曲线
+semilogy(SNR_dB, ber);
