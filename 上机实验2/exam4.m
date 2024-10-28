@@ -28,4 +28,5 @@ plot(f_selected, abs(HR_fft_selected));
 title('信号的频谱');
 xlabel('频率 (Hz)');
 ylabel('幅度');
+xlim([-1, 12]);
 grid on;
