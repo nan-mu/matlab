@@ -1,3 +1,5 @@
+clear;
+
 fid = fopen('XAN.BHZ.00.ori.SAC', 'r', 'ieee-le');
 A = fread(fid, [70, 1], 'float32');
 B = fread(fid, [40, 1], 'int32');

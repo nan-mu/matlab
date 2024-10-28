@@ -1,3 +1,5 @@
+clear;
+
 fid = fopen('S0037-130419-120000-A', 'r', 'ieee-le');
 para128 = fread(fid, [128, 1], 'char');
 para128s = para128(para128 ~= 0); %Remove the unused bytes
