@@ -1,3 +1,5 @@
+clear;
+
 n = 0:3;
 x = ones(1, 4);
 omega = linspace(0, 2 * pi, 1000);
